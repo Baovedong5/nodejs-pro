@@ -1,16 +1,10 @@
+import { prisma } from "config/client";
 import getConnection from "../config/db";
 
 const getAllUsers = async () => {
-  const connection = await getConnection();
+  const users = await prisma.user.findMany();
 
-  try {
-    const [result] = await connection.query("SELECT * FROM `users`");
-
-    return result;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
+  return users;
 };
 
 const handleCreateUser = async ({
@@ -22,26 +16,22 @@ const handleCreateUser = async ({
   email: string;
   address: string;
 }) => {
-  const connection = await getConnection();
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email,
+      address,
+    },
+  });
 
-  try {
-    const sql =
-      "INSERT INTO `users`(`name`, `email`, `address`) VALUES  (?,?,?)";
-    const values = [name, email, address];
-
-    const [result] = await connection.execute(sql, values);
-
-    return result;
-  } catch (error) {
-    console.log(error);
-  }
+  return user;
 };
 
 const handleDeleteUser = async (id: string) => {
   const connection = await getConnection();
 
   try {
-    const sql = "DELETE FROM `users` WHERE `id` = ? LIMIT 1";
+    const sql = "DELETE FROM `user` WHERE `id` = ? LIMIT 1";
     const values = [id];
 
     const [result, fields] = await connection.execute(sql, values);
